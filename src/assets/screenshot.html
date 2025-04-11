@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audio Converter - Screenshot</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f0f0f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    
+    .screenshot-container {
+      width: 800px;
+      height: 600px;
+      margin: 20px auto;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    .app-window {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background-color: #fff;
+    }
+    
+    .titlebar {
+      height: 30px;
+      background: linear-gradient(to bottom, #f9f9f9, #e4e4e4);
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+    }
+    
+    .titlebar-buttons {
+      display: flex;
+      gap: 6px;
+    }
+    
+    .button {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    
+    .close {
+      background-color: #ff5f57;
+    }
+    
+    .minimize {
+      background-color: #febc2e;
+    }
+    
+    .maximize {
+      background-color: #28c840;
+    }
+    
+    .window-title {
+      flex-grow: 1;
+      text-align: center;
+      font-size: 14px;
+      color: #555;
+    }
+    
+    .content {
+      flex-grow: 1;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    h1 {
+      color: #2d3748;
+      margin-bottom: 5px;
+      font-size: 24px;
+    }
+    
+    .logo {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 10px;
+    }
+    
+    .logo img {
+      width: 100%;
+      height: 100%;
+    }
+    
+    .drop-area {
+      border: 2px dashed #4299e1;
+      border-radius: 8px;
+      padding: 40px 20px;
+      text-align: center;
+      margin-bottom: 20px;
+      background-color: #ebf8ff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .drop-area p {
+      margin-bottom: 15px;
+      color: #4a5568;
+    }
+    
+    .btn {
+      background-color: #4299e1;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .output-dir {
+      display: flex;
+      flex-grow: 1;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .output-dir label {
+      color: #4a5568;
+      font-size: 14px;
+    }
+    
+    .output-dir input {
+      flex-grow: 1;
+      padding: 8px 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      font-size: 14px;
+      background-color: #f7fafc;
+    }
+    
+    .format-select {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .format-select label {
+      color: #4a5568;
+      font-size: 14px;
+    }
+    
+    .format-select select {
+      padding: 8px 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      font-size: 14px;
+      background-color: white;
+    }
+    
+    .file-list {
+      margin: 20px 0;
+      max-height: 150px;
+      overflow-y: auto;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+    }
+    
+    .file-item {
+      padding: 10px 15px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+    }
+    
+    .file-item:last-child {
+      border-bottom: none;
+    }
+    
+    .file-name {
+      flex-grow: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .file-status {
+      margin-left: 10px;
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 10px;
+    }
+    
+    .status-pending {
+      background-color: #edf2f7;
+      color: #718096;
+    }
+    
+    .status-converting {
+      background-color: #ebf8ff;
+      color: #3182ce;
+    }
+    
+    .status-success {
+      background-color: #f0fff4;
+      color: #38a169;
+    }
+    
+    .progress-container {
+      margin-top: 20px;
+    }
+    
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+      font-size: 14px;
+      color: #4a5568;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background-color: #e2e8f0;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      width: 75%;
+      background-color: #4299e1;
+    }
+    
+    .convert-btn {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      background-color: #38a169;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="screenshot-container">
+    <div class="app-window">
+      <div class="titlebar">
+        <div class="titlebar-buttons">
+          <div class="button close"></div>
+          <div class="button minimize"></div>
+          <div class="button maximize"></div>
+        </div>
+        <div class="window-title">Audio Converter</div>
+      </div>
+      
+      <div class="content">
+        <header>
+          <div class="logo">
+            <img src="icons/app-icon.png" alt="Audio Converter Logo">
+          </div>
+          <h1>Audio Converter</h1>
+        </header>
+        
+        <div class="drop-area">
+          <p>Drag audio files here or</p>
+          <button class="btn">Select Files</button>
+        </div>
+        
+        <div class="controls">
+          <div class="output-dir">
+            <label for="outputDir">Output folder:</label>
+            <input type="text" id="outputDir" value="/Users/username/Music/Converted" readonly>
+            <button class="btn">Choose</button>
+          </div>
+          
+          <div class="format-select">
+            <label for="formatSelect">Format:</label>
+            <select id="formatSelect">
+              <option value="mp3">MP3</option>
+              <option value="wav">WAV</option>
+              <option value="ogg">OGG</option>
+              <option value="flac">FLAC</option>
+              <option value="aac">AAC</option>
+              <option value="m4a">M4A</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="file-list">
+          <div class="file-item">
+            <span class="file-name">music-track-01.wav</span>
+            <span class="file-status status-success">Done</span>
+          </div>
+          <div class="file-item">
+            <span class="file-name">podcast-interview.wav</span>
+            <span class="file-status status-converting">Converting...</span>
+          </div>
+          <div class="file-item">
+            <span class="file-name">sound-effect.wav</span>
+            <span class="file-status status-pending">Pending</span>
+          </div>
+        </div>
+        
+        <div class="progress-container">
+          <div class="progress-info">
+            <span>2/3</span>
+            <span>75%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill"></div>
+          </div>
+        </div>
+        
+        <button class="convert-btn">Convert</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html> 

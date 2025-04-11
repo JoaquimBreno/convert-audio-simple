@@ -9,7 +9,11 @@
 
 *[English](#english) | [Español](#español) | [Português](#português) | [Deutsch](#deutsch)*
 
-![Screenshot](https://raw.githubusercontent.com/username/audio-converter/main/screenshot.png)
+<div align="center">
+  <img src="src/assets/icons/app-icon.png" alt="Audio Converter Logo" width="128" height="128">
+</div>
+
+![Screenshot](src/assets/screenshot.png)
 
 ## Key Features
 
@@ -40,6 +44,22 @@ A desktop application to convert audio files between different formats (MP3, WAV
 - Batch processing of multiple files
 - Custom output directory selection
 - Compatible with Windows, macOS, and Linux
+
+### Application Icon
+
+The application uses a professional audio wave icon for a clean, modern look. The icon is displayed in the taskbar, application window, and file associations on all supported platforms.
+
+If you want to customize the icon:
+
+1. Replace the icon files in the `src/assets/icons` directory:
+   - `app-icon.png` - Main application icon (512x512 pixels recommended)
+   - `icon.icns` - macOS icon
+   - `icon.ico` - Windows icon
+
+2. Rebuild the application using:
+   ```bash
+   npm run dist
+   ```
 
 ### Installation
 

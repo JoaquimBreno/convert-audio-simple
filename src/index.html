@@ -1,80 +1,157 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Conversor de Áudio</title>
+  <title data-i18n="app_title">Audio Converter</title>
   <style>
+    :root {
+      --primary-color: #4a6bff;
+      --primary-dark: #3d5bd9;
+      --success-color: #34c759;
+      --danger-color: #ff3b30;
+      --warning-color: #ffcc00;
+      --info-color: #5ac8fa;
+      --text-color: #333;
+      --text-light: #767676;
+      --background-color: #f5f8fa;
+      --card-bg: #ffffff;
+      --border-color: #e2e8f0;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+      --border-radius: 8px;
+      --transition-speed: 0.3s;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    /* Dark mode */
+    .dark-mode {
+      --primary-color: #5c7dff;
+      --primary-dark: #4a6bff;
+      --text-color: #f5f5f5;
+      --text-light: #a0a0a0;
+      --background-color: #121212;
+      --card-bg: #1e1e1e;
+      --border-color: #333;
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: var(--font-family);
     }
     
     body {
-      background-color: #f5f5f5;
-      color: #333;
+      background-color: var(--background-color);
+      color: var(--text-color);
       display: flex;
       flex-direction: column;
       min-height: 100vh;
       padding: 20px;
+      transition: background-color var(--transition-speed);
     }
     
     h1 {
       text-align: center;
-      margin-bottom: 20px;
-      color: #2d3748;
+      margin-bottom: 5px;
+      color: var(--text-color);
+      font-size: 28px;
+      font-weight: 600;
     }
     
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      background-color: white;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      padding: 30px;
+    .subtitle {
+      text-align: center;
+      margin-bottom: 20px;
+      color: var(--text-light);
+      font-size: 14px;
+    }
+    
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      margin-top: 50px; /* Espaço para os controles de idioma */
+      position: relative;
       flex-grow: 1;
     }
     
+    .container {
+      max-width: 900px;
+      width: 100%;
+      background-color: var(--card-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-md);
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      transition: background-color var(--transition-speed), box-shadow var(--transition-speed);
+    }
+    
+    .logo-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .logo {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+    }
+    
     .drop-area {
-      border: 2px dashed #ccc;
-      border-radius: 8px;
+      border: 2px dashed var(--border-color);
+      border-radius: var(--border-radius);
       padding: 40px 20px;
       text-align: center;
       margin-bottom: 20px;
-      transition: all 0.3s;
+      transition: all var(--transition-speed);
       cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
     
     .drop-area:hover, .drop-area.active {
-      border-color: #4299e1;
-      background-color: #ebf8ff;
+      border-color: var(--primary-color);
+      background-color: rgba(74, 107, 255, 0.05);
     }
     
     .drop-area p {
-      margin-bottom: 10px;
-      color: #4a5568;
+      margin-bottom: 15px;
+      color: var(--text-light);
     }
     
     .file-list {
       margin: 20px 0;
       max-height: 200px;
       overflow-y: auto;
-      border: 1px solid #e2e8f0;
-      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      transition: border-color var(--transition-speed);
     }
     
     .file-item {
-      padding: 10px 15px;
-      border-bottom: 1px solid #e2e8f0;
+      padding: 12px 15px;
+      border-bottom: 1px solid var(--border-color);
       display: flex;
       justify-content: space-between;
       align-items: center;
+      transition: background-color var(--transition-speed);
     }
     
     .file-item:last-child {
       border-bottom: none;
+    }
+    
+    .file-item:hover {
+      background-color: rgba(0, 0, 0, 0.02);
+    }
+    
+    .dark-mode .file-item:hover {
+      background-color: rgba(255, 255, 255, 0.05);
     }
     
     .file-name {
@@ -86,23 +163,30 @@
     
     .file-status {
       margin-left: 10px;
-      font-size: 14px;
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-weight: 500;
     }
     
     .file-status.pending {
-      color: #718096;
+      background-color: #f7f7f7;
+      color: var(--text-light);
     }
     
     .file-status.converting {
-      color: #3182ce;
+      background-color: rgba(74, 107, 255, 0.1);
+      color: var(--primary-color);
     }
     
     .file-status.success {
-      color: #38a169;
+      background-color: rgba(52, 199, 89, 0.1);
+      color: var(--success-color);
     }
     
     .file-status.error {
-      color: #e53e3e;
+      background-color: rgba(255, 59, 48, 0.1);
+      color: var(--danger-color);
     }
     
     .controls {
@@ -121,10 +205,18 @@
     
     .output-dir input {
       flex-grow: 1;
-      padding: 8px 12px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
       font-size: 14px;
+      background-color: var(--card-bg);
+      color: var(--text-color);
+      transition: border-color var(--transition-speed), background-color var(--transition-speed);
+    }
+    
+    .output-dir input:focus {
+      outline: none;
+      border-color: var(--primary-color);
     }
     
     .format-select {
@@ -134,31 +226,50 @@
     }
     
     .format-select select {
-      padding: 8px 12px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
       font-size: 14px;
-      background-color: white;
+      background-color: var(--card-bg);
+      color: var(--text-color);
+      cursor: pointer;
+      transition: border-color var(--transition-speed), background-color var(--transition-speed);
+      min-width: 150px;
+    }
+    
+    .format-select select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+    
+    label {
+      color: var(--text-light);
+      font-size: 14px;
     }
     
     button {
-      background-color: #4299e1;
+      background-color: var(--primary-color);
       color: white;
       border: none;
-      border-radius: 4px;
-      padding: 8px 16px;
+      border-radius: var(--border-radius);
+      padding: 10px 16px;
       cursor: pointer;
       font-weight: 500;
-      transition: background-color 0.3s;
+      transition: background-color var(--transition-speed), transform var(--transition-speed);
     }
     
     button:hover {
-      background-color: #3182ce;
+      background-color: var(--primary-dark);
+    }
+    
+    button:active {
+      transform: translateY(1px);
     }
     
     button:disabled {
-      background-color: #a0aec0;
+      background-color: var(--text-light);
       cursor: not-allowed;
+      transform: none;
     }
     
     .convert-btn {
@@ -167,11 +278,12 @@
       font-size: 16px;
       font-weight: 600;
       margin-top: 20px;
-      background-color: #38a169;
+      background-color: var(--success-color);
+      transition: background-color var(--transition-speed);
     }
     
     .convert-btn:hover {
-      background-color: #2f855a;
+      background-color: #2db14f;
     }
     
     .progress-container {
@@ -182,78 +294,235 @@
       display: flex;
       justify-content: space-between;
       margin-bottom: 5px;
+      font-size: 14px;
+      color: var(--text-light);
     }
     
     .progress-bar {
       width: 100%;
       height: 10px;
-      background-color: #e2e8f0;
+      background-color: var(--border-color);
       border-radius: 5px;
       overflow: hidden;
+      transition: background-color var(--transition-speed);
     }
     
     .progress-fill {
       height: 100%;
-      background-color: #4299e1;
+      background-color: var(--primary-color);
       width: 0%;
-      transition: width 0.3s;
+      transition: width 0.3s ease-in-out;
     }
     
     footer {
       text-align: center;
       margin-top: 20px;
+      font-size: 13px;
+      color: var(--text-light);
+    }
+    
+    /* Navbar superior com controles de idioma */
+    .top-navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background-color: var(--card-bg);
+      box-shadow: var(--shadow-sm);
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+      transition: background-color var(--transition-speed);
+    }
+    
+    .app-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .app-brand img {
+      width: 24px;
+      height: 24px;
+    }
+    
+    .app-brand span {
+      font-weight: 600;
+      color: var(--text-color);
+    }
+    
+    .controls-right {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+    
+    .language-selector {
+      display: flex;
+      gap: 5px;
+    }
+    
+    .language-btn {
+      background-color: transparent;
+      color: var(--text-light);
+      font-size: 12px;
+      padding: 5px 8px;
+      border-radius: 4px;
+      border: 1px solid transparent;
+      transition: all var(--transition-speed);
+    }
+    
+    .language-btn:hover {
+      background-color: rgba(74, 107, 255, 0.05);
+      border-color: var(--border-color);
+    }
+    
+    .language-btn.active {
+      color: var(--primary-color);
+      background-color: rgba(74, 107, 255, 0.1);
+      border-color: rgba(74, 107, 255, 0.2);
+      font-weight: bold;
+    }
+    
+    .dark-mode-toggle {
+      background-color: transparent;
+      color: var(--text-light);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 5px 10px;
       font-size: 14px;
-      color: #718096;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all var(--transition-speed);
+    }
+    
+    .dark-mode-toggle:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+    
+    .dark-mode-toggle .mode-text {
+      display: none;
+    }
+    
+    .dark-mode .dark-mode-toggle:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    @media (max-width: 600px) {
+      .main-content {
+        margin-top: 60px;
+      }
+      
+      .top-navbar {
+        padding: 10px;
+      }
+      
+      .app-brand span {
+        display: none;
+      }
+      
+      .language-btn {
+        padding: 5px;
+      }
+      
+      .controls {
+        flex-direction: column;
+      }
+      
+      .output-dir {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .format-select {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .format-select select {
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Conversor de Áudio</h1>
-    
-    <div id="dropArea" class="drop-area">
-      <p>Arraste arquivos de áudio aqui ou</p>
-      <button id="selectFilesBtn">Selecionar Arquivos</button>
+  <!-- Barra de navegação superior com controles de idioma -->
+  <div class="top-navbar">
+    <div class="app-brand">
+      <img src="assets/icons/app-icon.png" alt="Audio Converter">
+      <span data-i18n="app_title">Audio Converter</span>
     </div>
     
-    <div class="controls">
-      <div class="output-dir">
-        <label for="outputDir">Pasta de saída:</label>
-        <input type="text" id="outputDir" readonly>
-        <button id="selectOutputDirBtn">Escolher</button>
+    <div class="controls-right">
+      <div class="language-selector">
+        <button class="language-btn" data-lang="en">EN</button>
+        <button class="language-btn" data-lang="es">ES</button>
+        <button class="language-btn" data-lang="pt">PT</button>
+        <button class="language-btn" data-lang="de">DE</button>
       </div>
       
-      <div class="format-select">
-        <label for="formatSelect">Formato:</label>
-        <select id="formatSelect">
-          <option value="mp3">MP3</option>
-          <option value="wav">WAV</option>
-          <option value="ogg">OGG</option>
-          <option value="flac">FLAC</option>
-          <option value="aac">AAC</option>
-          <option value="m4a">M4A</option>
-        </select>
-      </div>
+      <button class="dark-mode-toggle" title="Toggle Dark Mode">
+        <span class="mode-icon">🌙</span>
+        <span class="mode-text" data-i18n="menu.view.toggle_dark">Toggle Dark Mode</span>
+      </button>
     </div>
-    
-    <div id="fileList" class="file-list" style="display: none;"></div>
-    
-    <div class="progress-container" style="display: none;">
-      <div class="progress-info">
-        <span id="progressText">0/0</span>
-        <span id="progressPercent">0%</span>
-      </div>
-      <div class="progress-bar">
-        <div id="progressFill" class="progress-fill"></div>
-      </div>
-    </div>
-    
-    <button id="convertBtn" class="convert-btn" disabled>Converter</button>
   </div>
   
-  <footer>
-    <p>Conversor de Áudio - Powered by Electron e FFmpeg</p>
-  </footer>
+  <div class="main-content">
+    <div class="container">
+      <div class="logo-container">
+        <img src="assets/icons/app-icon.png" alt="Audio Converter Logo" class="logo">
+        <h1 data-i18n="app_title">Audio Converter</h1>
+        <p class="subtitle">MP3 • WAV • OGG • FLAC • AAC • M4A</p>
+      </div>
+      
+      <div id="dropArea" class="drop-area">
+        <p data-i18n="drop_area.text">Drag audio files here or</p>
+        <button id="selectFilesBtn" data-i18n="drop_area.button">Select Files</button>
+      </div>
+      
+      <div class="controls">
+        <div class="output-dir">
+          <label for="outputDir" data-i18n="output_folder.label">Output folder:</label>
+          <input type="text" id="outputDir" readonly>
+          <button id="selectOutputDirBtn" data-i18n="output_folder.button">Choose</button>
+        </div>
+        
+        <div class="format-select">
+          <label for="formatSelect" data-i18n="format.label">Format:</label>
+          <select id="formatSelect">
+            <option value="mp3" data-i18n="formats.mp3">MP3 (compressed, good quality)</option>
+            <option value="wav" data-i18n="formats.wav">WAV (uncompressed, lossless)</option>
+            <option value="ogg" data-i18n="formats.ogg">OGG (compressed, good quality)</option>
+            <option value="flac" data-i18n="formats.flac">FLAC (compressed, lossless)</option>
+            <option value="aac" data-i18n="formats.aac">AAC (compressed, high quality)</option>
+            <option value="m4a" data-i18n="formats.m4a">M4A (AAC in MP4 container)</option>
+          </select>
+        </div>
+      </div>
+      
+      <div id="fileList" class="file-list" style="display: none;"></div>
+      
+      <div class="progress-container" style="display: none;">
+        <div class="progress-info">
+          <span id="progressText">0/0</span>
+          <span id="progressPercent">0%</span>
+        </div>
+        <div class="progress-bar">
+          <div id="progressFill" class="progress-fill"></div>
+        </div>
+      </div>
+      
+      <button id="convertBtn" class="convert-btn" disabled data-i18n="convert_button">Convert</button>
+    </div>
+    
+    <footer>
+      <p>Audio Converter © 2023 - <span>Powered by Electron & FFmpeg</span></p>
+    </footer>
+  </div>
   
   <script>
     // Elementos da interface
@@ -268,6 +537,8 @@
     const progressText = document.getElementById('progressText');
     const progressPercent = document.getElementById('progressPercent');
     const progressFill = document.getElementById('progressFill');
+    const darkModeToggle = document.querySelector('.dark-mode-toggle');
+    const languageButtons = document.querySelectorAll('.language-btn');
     
     // Variáveis de estado
     let selectedFiles = [];
@@ -276,24 +547,136 @@
     let currentFileIndex = 0;
     let successCount = 0;
     let errorCount = 0;
+    let darkMode = localStorage.getItem('darkMode') === 'true';
+    let currentLanguage = '';
+    
+    // Aplicar modo escuro se estiver ativado
+    if (darkMode) {
+      document.body.classList.add('dark-mode');
+      darkModeToggle.querySelector('.mode-icon').textContent = '☀️';
+    }
+    
+    // Função para traduzir a interface
+    async function translateUI() {
+      try {
+        // Forçar atualização das traduções
+        await window.i18n.refreshTranslations();
+        
+        // Obter o idioma atual
+        currentLanguage = await window.electronAPI.getCurrentLanguage();
+        
+        // Atualizar botões de idioma
+        languageButtons.forEach(btn => {
+          if (btn.dataset.lang === currentLanguage) {
+            btn.classList.add('active');
+          } else {
+            btn.classList.remove('active');
+          }
+        });
+        
+        // Traduzir todos os elementos com data-i18n
+        document.querySelectorAll('[data-i18n]').forEach(element => {
+          const key = element.getAttribute('data-i18n');
+          if (key) {
+            const translatedText = window.i18n.t(key);
+            element.textContent = translatedText;
+          }
+        });
+        
+        // Traduzir também as opções do select
+        Array.from(formatSelect.options).forEach(option => {
+          const key = option.getAttribute('data-i18n');
+          if (key) {
+            option.textContent = window.i18n.t(key);
+          }
+        });
+        
+        // Atualizar título da página
+        document.title = window.i18n.t('app_title');
+        
+        return currentLanguage;
+      } catch (error) {
+        console.error('Erro ao traduzir interface:', error);
+        return null;
+      }
+    }
     
     // Event listeners
     selectFilesBtn.addEventListener('click', selectFiles);
     selectOutputDirBtn.addEventListener('click', selectOutputDir);
     convertBtn.addEventListener('click', startConversion);
     
+    // Alternador de modo escuro
+    darkModeToggle.addEventListener('click', () => {
+      darkMode = !darkMode;
+      document.body.classList.toggle('dark-mode');
+      localStorage.setItem('darkMode', darkMode);
+      darkModeToggle.querySelector('.mode-icon').textContent = darkMode ? '☀️' : '🌙';
+    });
+    
+    // Seletor de idioma
+    languageButtons.forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const lang = btn.dataset.lang;
+        try {
+          // Destacar o botão clicado imediatamente para feedback visual
+          languageButtons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          
+          const newLang = await window.electronAPI.changeLanguage(lang);
+          
+          // Forçar uma tradução completa da interface
+          setTimeout(async () => {
+            await translateUI();
+          }, 100);
+        } catch (error) {
+          console.error('Erro ao alterar idioma:', error);
+        }
+      });
+    });
+    
+    // Detectar eventos do processo principal
+    window.electronAPI.onSystemEvent((eventType, data) => {
+      if (eventType === 'file-opened') {
+        // Adicionar arquivo que foi aberto pelo sistema
+        addFiles([data]);
+      } else if (eventType === 'language-changed') {
+        // Atualizar a interface com delay para garantir que as traduções foram atualizadas
+        setTimeout(async () => {
+          await translateUI();
+        }, 100);
+      } else if (eventType === 'files-selected') {
+        addFiles(data);
+      } else if (eventType === 'output-dir-selected') {
+        outputDir = data;
+        outputDirInput.value = data;
+        updateConvertButton();
+      } else if (eventType === 'clear-queue') {
+        selectedFiles = [];
+        fileListElem.innerHTML = '';
+        fileListElem.style.display = 'none';
+        updateConvertButton();
+      } else if (eventType === 'toggle-dark-mode') {
+        darkModeToggle.click();
+      }
+    });
+    
     // Drag & drop
     dropArea.addEventListener('dragover', (e) => {
       e.preventDefault();
+      e.stopPropagation();
       dropArea.classList.add('active');
     });
     
-    dropArea.addEventListener('dragleave', () => {
+    dropArea.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       dropArea.classList.remove('active');
     });
     
     dropArea.addEventListener('drop', (e) => {
       e.preventDefault();
+      e.stopPropagation();
       dropArea.classList.remove('active');
       
       try {
@@ -304,53 +687,17 @@
           const files = Array.from(e.dataTransfer.files);
           console.log('Arquivos arrastados:', files.map(f => f.name));
           
-          // No macOS o path direto pode não estar disponível
-          // então vamos enviar os arquivos para o processo principal
+          // Enviar arquivos para o processo principal para lidar com permissões no macOS
           handleDroppedFiles(files);
         } else {
           console.warn('Nenhum arquivo encontrado no evento drop');
-          alert('Por favor, arraste apenas arquivos de áudio suportados (WAV, MP3, OGG, FLAC, AAC, M4A)');
+          alert(window.i18n.t('notifications.select_files'));
         }
       } catch (error) {
         console.error('Erro ao processar arquivos arrastados:', error);
-        alert('Erro ao processar os arquivos. Por favor, tente selecionar os arquivos usando o botão.');
+        alert(window.i18n.t('notifications.conversion_error'));
       }
     });
-    
-    // Nova função para lidar com arquivos arrastados
-    async function handleDroppedFiles(files) {
-      try {
-        // Filtrar apenas os arquivos de áudio suportados pelo nome
-        const validFiles = files.filter(file => {
-          const ext = file.name.split('.').pop().toLowerCase();
-          return ['wav', 'mp3', 'ogg', 'flac', 'aac', 'm4a'].includes(ext);
-        });
-        
-        if (validFiles.length === 0) {
-          console.warn('Nenhum arquivo de áudio suportado encontrado');
-          alert('Por favor, arraste apenas arquivos de áudio suportados (WAV, MP3, OGG, FLAC, AAC, M4A)');
-          return;
-        }
-        
-        // Criar array com os nomes dos arquivos para debug
-        const fileNames = validFiles.map(f => f.name);
-        console.log('Arquivos válidos:', fileNames);
-        
-        // Passar os arquivos para o processo principal para obter os caminhos completos
-        const filePaths = await window.electronAPI.handleDroppedFiles(validFiles);
-        console.log('Caminhos obtidos do processo principal:', filePaths);
-        
-        if (filePaths && filePaths.length > 0) {
-          addFiles(filePaths);
-        } else {
-          console.warn('Nenhum caminho de arquivo retornado pelo processo principal');
-          alert('Não foi possível obter os caminhos dos arquivos. Por favor, use o botão para selecionar os arquivos.');
-        }
-      } catch (error) {
-        console.error('Erro ao processar arquivos arrastados:', error);
-        alert('Erro ao processar os arquivos: ' + (error.message || error));
-      }
-    }
     
     // Funções principais
     async function selectFiles() {
@@ -363,7 +710,7 @@
         }
       } catch (error) {
         console.error('Erro ao selecionar arquivos:', error);
-        alert('Erro ao selecionar arquivos: ' + (error.message || 'Erro desconhecido'));
+        alert(window.i18n.t('notifications.select_files'));
       }
     }
     
@@ -379,7 +726,41 @@
         }
       } catch (error) {
         console.error('Erro ao selecionar diretório de saída:', error);
-        alert('Erro ao selecionar diretório: ' + (error.message || 'Erro desconhecido'));
+        alert(window.i18n.t('notifications.select_output'));
+      }
+    }
+    
+    async function handleDroppedFiles(files) {
+      try {
+        // Filtrar apenas os arquivos de áudio suportados pelo nome
+        const validFiles = files.filter(file => {
+          const ext = file.name.split('.').pop().toLowerCase();
+          return ['wav', 'mp3', 'ogg', 'flac', 'aac', 'm4a'].includes(ext);
+        });
+        
+        if (validFiles.length === 0) {
+          console.warn('Nenhum arquivo de áudio suportado encontrado');
+          alert(window.i18n.t('notifications.select_files'));
+          return;
+        }
+        
+        // Criar array com os nomes dos arquivos para debug
+        const fileNames = validFiles.map(f => f.name);
+        console.log('Arquivos válidos:', fileNames);
+        
+        // Passar os arquivos para o processo principal para obter os caminhos completos
+        const filePaths = await window.electronAPI.handleDroppedFiles(validFiles);
+        console.log('Caminhos obtidos do processo principal:', filePaths);
+        
+        if (filePaths && filePaths.length > 0) {
+          addFiles(filePaths);
+        } else {
+          console.warn('Nenhum caminho de arquivo retornado pelo processo principal');
+          alert(window.i18n.t('notifications.select_files'));
+        }
+      } catch (error) {
+        console.error('Erro ao processar arquivos arrastados:', error);
+        alert(window.i18n.t('notifications.conversion_error'));
       }
     }
     
@@ -417,7 +798,7 @@
           fileItem.className = 'file-item';
           fileItem.innerHTML = `
             <span class="file-name" title="${path}">${fileName}</span>
-            <span class="file-status pending">Pendente</span>
+            <span class="file-status pending">${window.i18n.t('file_status.pending')}</span>
           `;
           
           fileListElem.appendChild(fileItem);
@@ -452,7 +833,7 @@
       const statusElements = document.querySelectorAll('.file-status');
       statusElements.forEach(elem => {
         elem.className = 'file-status pending';
-        elem.textContent = 'Pendente';
+        elem.textContent = window.i18n.t('file_status.pending');
       });
       
       // Iniciar conversão
@@ -475,16 +856,16 @@
       const fileItem = fileListElem.children[currentFileIndex];
       const statusElem = fileItem.querySelector('.file-status');
       statusElem.className = 'file-status converting';
-      statusElem.textContent = 'Convertendo...';
+      statusElem.textContent = window.i18n.t('file_status.converting');
       
       try {
         // Verificar se temos todos os dados necessários
         if (!inputPath) {
-          throw { error: 'Caminho do arquivo de entrada inválido' };
+          throw { error: window.i18n.t('notifications.select_files') };
         }
         
         if (!outputDir) {
-          throw { error: 'Diretório de saída não selecionado' };
+          throw { error: window.i18n.t('notifications.select_output') };
         }
         
         // Registrar no log o que estamos tentando converter
@@ -512,7 +893,7 @@
         
         // Atualizar status de sucesso
         statusElem.className = 'file-status success';
-        statusElem.textContent = 'Concluído';
+        statusElem.textContent = window.i18n.t('file_status.success');
         successCount++;
       } catch (error) {
         console.error('Erro ao converter:', error);
@@ -520,9 +901,9 @@
         statusElem.className = 'file-status error';
         
         // Tentar obter a mensagem de erro mais apropriada
-        let errorMessage = 'Erro';
+        let errorMessage = window.i18n.t('file_status.error');
         if (error && typeof error === 'object') {
-          errorMessage = error.error || error.message || 'Erro desconhecido';
+          errorMessage = error.error || error.message || window.i18n.t('file_status.error');
         } else if (typeof error === 'string') {
           errorMessage = error;
         }
@@ -541,6 +922,13 @@
       // Processar próximo arquivo
       processNextFile();
     }
+    
+    // Inicializar a tradução da interface ao carregar
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Aguardar que a API Electron esteja disponível
+      await translateUI();
+      console.log('Interface traduzida com sucesso!');
+    });
   </script>
 </body>
 </html> 

@@ -1,0 +1,173 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  prepare-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      
+      - name: Verify icons exist
+        run: |
+          mkdir -p src/assets/icons
+          if [ ! -f src/assets/icons/app-icon.png ]; then
+            echo "Downloading app icon..."
+            curl -o src/assets/icons/app-icon.png https://img.icons8.com/color/512/audio-wave.png
+          fi
+          if [ ! -f src/assets/icons/icon.icns ]; then
+            echo "Downloading macOS icon..."
+            curl -o src/assets/icons/icon.icns https://img.icons8.com/color/512/audio-wave.png
+          fi
+          if [ ! -f src/assets/icons/icon.ico ]; then
+            echo "Downloading Windows icon..."
+            curl -o src/assets/icons/icon.ico https://img.icons8.com/color/256/audio-wave.png
+          fi
+      
+      - name: Upload assets
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-assets
+          path: src/assets
+
+  build-windows:
+    needs: prepare-assets
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'npm'
+          
+      - name: Download assets
+        uses: actions/download-artifact@v3
+        with:
+          name: app-assets
+          path: src/assets
+          
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build for Windows
+        run: npm run dist:win
+        
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-artifacts
+          path: |
+            dist/*.exe
+            dist/*.zip
+
+  build-macos:
+    needs: prepare-assets
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'npm'
+          
+      - name: Download assets
+        uses: actions/download-artifact@v3
+        with:
+          name: app-assets
+          path: src/assets
+          
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build for macOS
+        run: npm run dist:mac
+        
+      - name: Upload macOS artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos-artifacts
+          path: dist/*.dmg
+
+  build-linux:
+    needs: prepare-assets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'npm'
+          
+      - name: Download assets
+        uses: actions/download-artifact@v3
+        with:
+          name: app-assets
+          path: src/assets
+          
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build for Linux
+        run: npm run dist:linux
+        
+      - name: Upload Linux artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-artifacts
+          path: |
+            dist/*.AppImage
+            dist/*.deb
+
+  create-release:
+    needs: [build-windows, build-macos, build-linux]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+          
+      - name: Display structure of downloaded files
+        run: ls -R artifacts
+        
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Audio Converter v${{ steps.get_version.outputs.VERSION }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            artifacts/windows-artifacts/*.exe
+            artifacts/windows-artifacts/*.zip
+            artifacts/macos-artifacts/*.dmg
+            artifacts/linux-artifacts/*.AppImage
+            artifacts/linux-artifacts/*.deb
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 

@@ -29,16 +29,28 @@
       "src/**/*",
       "node_modules/**/*"
     ],
+    "directories": {
+      "buildResources": "src/assets"
+    },
     "mac": {
       "category": "public.app-category.utilities",
-      "target": ["dmg"]
+      "target": ["dmg"],
+      "icon": "src/assets/icons/icon.icns"
     },
     "win": {
-      "target": ["nsis"]
+      "target": ["nsis"],
+      "icon": "src/assets/icons/icon.ico"
     },
     "linux": {
       "target": ["AppImage", "deb"],
-      "category": "Utility"
+      "category": "Utility",
+      "icon": "src/assets/icons/app-icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
     }
   }
 }
