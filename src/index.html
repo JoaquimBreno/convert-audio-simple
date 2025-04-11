@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conversor de Áudio</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background-color: #f5f5f5;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #2d3748;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      flex-grow: 1;
+    }
+    
+    .drop-area {
+      border: 2px dashed #ccc;
+      border-radius: 8px;
+      padding: 40px 20px;
+      text-align: center;
+      margin-bottom: 20px;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    
+    .drop-area:hover, .drop-area.active {
+      border-color: #4299e1;
+      background-color: #ebf8ff;
+    }
+    
+    .drop-area p {
+      margin-bottom: 10px;
+      color: #4a5568;
+    }
+    
+    .file-list {
+      margin: 20px 0;
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+    }
+    
+    .file-item {
+      padding: 10px 15px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .file-item:last-child {
+      border-bottom: none;
+    }
+    
+    .file-name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex-grow: 1;
+    }
+    
+    .file-status {
+      margin-left: 10px;
+      font-size: 14px;
+    }
+    
+    .file-status.pending {
+      color: #718096;
+    }
+    
+    .file-status.converting {
+      color: #3182ce;
+    }
+    
+    .file-status.success {
+      color: #38a169;
+    }
+    
+    .file-status.error {
+      color: #e53e3e;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .output-dir {
+      display: flex;
+      flex-grow: 1;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .output-dir input {
+      flex-grow: 1;
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    
+    .format-select {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .format-select select {
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+      background-color: white;
+    }
+    
+    button {
+      background-color: #4299e1;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color 0.3s;
+    }
+    
+    button:hover {
+      background-color: #3182ce;
+    }
+    
+    button:disabled {
+      background-color: #a0aec0;
+      cursor: not-allowed;
+    }
+    
+    .convert-btn {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      margin-top: 20px;
+      background-color: #38a169;
+    }
+    
+    .convert-btn:hover {
+      background-color: #2f855a;
+    }
+    
+    .progress-container {
+      margin-top: 20px;
+    }
+    
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background-color: #e2e8f0;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background-color: #4299e1;
+      width: 0%;
+      transition: width 0.3s;
+    }
+    
+    footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+      color: #718096;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Conversor de Áudio</h1>
+    
+    <div id="dropArea" class="drop-area">
+      <p>Arraste arquivos de áudio aqui ou</p>
+      <button id="selectFilesBtn">Selecionar Arquivos</button>
+    </div>
+    
+    <div class="controls">
+      <div class="output-dir">
+        <label for="outputDir">Pasta de saída:</label>
+        <input type="text" id="outputDir" readonly>
+        <button id="selectOutputDirBtn">Escolher</button>
+      </div>
+      
+      <div class="format-select">
+        <label for="formatSelect">Formato:</label>
+        <select id="formatSelect">
+          <option value="mp3">MP3</option>
+          <option value="wav">WAV</option>
+          <option value="ogg">OGG</option>
+          <option value="flac">FLAC</option>
+          <option value="aac">AAC</option>
+          <option value="m4a">M4A</option>
+        </select>
+      </div>
+    </div>
+    
+    <div id="fileList" class="file-list" style="display: none;"></div>
+    
+    <div class="progress-container" style="display: none;">
+      <div class="progress-info">
+        <span id="progressText">0/0</span>
+        <span id="progressPercent">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div id="progressFill" class="progress-fill"></div>
+      </div>
+    </div>
+    
+    <button id="convertBtn" class="convert-btn" disabled>Converter</button>
+  </div>
+  
+  <footer>
+    <p>Conversor de Áudio - Powered by Electron e FFmpeg</p>
+  </footer>
+  
+  <script>
+    // Elementos da interface
+    const dropArea = document.getElementById('dropArea');
+    const selectFilesBtn = document.getElementById('selectFilesBtn');
+    const selectOutputDirBtn = document.getElementById('selectOutputDirBtn');
+    const outputDirInput = document.getElementById('outputDir');
+    const formatSelect = document.getElementById('formatSelect');
+    const fileListElem = document.getElementById('fileList');
+    const convertBtn = document.getElementById('convertBtn');
+    const progressContainer = document.querySelector('.progress-container');
+    const progressText = document.getElementById('progressText');
+    const progressPercent = document.getElementById('progressPercent');
+    const progressFill = document.getElementById('progressFill');
+    
+    // Variáveis de estado
+    let selectedFiles = [];
+    let outputDir = '';
+    let converting = false;
+    let currentFileIndex = 0;
+    let successCount = 0;
+    let errorCount = 0;
+    
+    // Event listeners
+    selectFilesBtn.addEventListener('click', selectFiles);
+    selectOutputDirBtn.addEventListener('click', selectOutputDir);
+    convertBtn.addEventListener('click', startConversion);
+    
+    // Drag & drop
+    dropArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropArea.classList.add('active');
+    });
+    
+    dropArea.addEventListener('dragleave', () => {
+      dropArea.classList.remove('active');
+    });
+    
+    dropArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropArea.classList.remove('active');
+      
+      try {
+        console.log('Evento drop acionado');
+        
+        // Verificar se temos arquivos
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          const files = Array.from(e.dataTransfer.files);
+          console.log('Arquivos arrastados:', files.map(f => f.name));
+          
+          // No macOS o path direto pode não estar disponível
+          // então vamos enviar os arquivos para o processo principal
+          handleDroppedFiles(files);
+        } else {
+          console.warn('Nenhum arquivo encontrado no evento drop');
+          alert('Por favor, arraste apenas arquivos de áudio suportados (WAV, MP3, OGG, FLAC, AAC, M4A)');
+        }
+      } catch (error) {
+        console.error('Erro ao processar arquivos arrastados:', error);
+        alert('Erro ao processar os arquivos. Por favor, tente selecionar os arquivos usando o botão.');
+      }
+    });
+    
+    // Nova função para lidar com arquivos arrastados
+    async function handleDroppedFiles(files) {
+      try {
+        // Filtrar apenas os arquivos de áudio suportados pelo nome
+        const validFiles = files.filter(file => {
+          const ext = file.name.split('.').pop().toLowerCase();
+          return ['wav', 'mp3', 'ogg', 'flac', 'aac', 'm4a'].includes(ext);
+        });
+        
+        if (validFiles.length === 0) {
+          console.warn('Nenhum arquivo de áudio suportado encontrado');
+          alert('Por favor, arraste apenas arquivos de áudio suportados (WAV, MP3, OGG, FLAC, AAC, M4A)');
+          return;
+        }
+        
+        // Criar array com os nomes dos arquivos para debug
+        const fileNames = validFiles.map(f => f.name);
+        console.log('Arquivos válidos:', fileNames);
+        
+        // Passar os arquivos para o processo principal para obter os caminhos completos
+        const filePaths = await window.electronAPI.handleDroppedFiles(validFiles);
+        console.log('Caminhos obtidos do processo principal:', filePaths);
+        
+        if (filePaths && filePaths.length > 0) {
+          addFiles(filePaths);
+        } else {
+          console.warn('Nenhum caminho de arquivo retornado pelo processo principal');
+          alert('Não foi possível obter os caminhos dos arquivos. Por favor, use o botão para selecionar os arquivos.');
+        }
+      } catch (error) {
+        console.error('Erro ao processar arquivos arrastados:', error);
+        alert('Erro ao processar os arquivos: ' + (error.message || error));
+      }
+    }
+    
+    // Funções principais
+    async function selectFiles() {
+      try {
+        console.log('Solicitando seleção de arquivos...');
+        const filePaths = await window.electronAPI.selectFiles();
+        console.log('Arquivos selecionados:', filePaths);
+        if (filePaths && filePaths.length > 0) {
+          addFiles(filePaths);
+        }
+      } catch (error) {
+        console.error('Erro ao selecionar arquivos:', error);
+        alert('Erro ao selecionar arquivos: ' + (error.message || 'Erro desconhecido'));
+      }
+    }
+    
+    async function selectOutputDir() {
+      try {
+        console.log('Solicitando seleção de diretório de saída...');
+        const dirPath = await window.electronAPI.selectOutputDirectory();
+        console.log('Diretório selecionado:', dirPath);
+        if (dirPath) {
+          outputDir = dirPath;
+          outputDirInput.value = dirPath;
+          updateConvertButton();
+        }
+      } catch (error) {
+        console.error('Erro ao selecionar diretório de saída:', error);
+        alert('Erro ao selecionar diretório: ' + (error.message || 'Erro desconhecido'));
+      }
+    }
+    
+    function addFiles(filePaths) {
+      if (!filePaths || filePaths.length === 0) {
+        console.warn('Nenhum arquivo para adicionar');
+        return;
+      }
+      
+      // Adicionar apenas arquivos novos
+      const newFiles = filePaths.filter(path => {
+        // Validar paths antes de adicionar
+        if (!path || typeof path !== 'string') {
+          console.warn('Path inválido ignorado:', path);
+          return false;
+        }
+        return !selectedFiles.includes(path);
+      });
+      
+      console.log('Novos arquivos a adicionar:', newFiles);
+      
+      if (newFiles.length === 0) return;
+      
+      selectedFiles = [...selectedFiles, ...newFiles];
+      
+      // Exibir lista de arquivos
+      fileListElem.style.display = 'block';
+      
+      // Adicionar itens na interface
+      newFiles.forEach(path => {
+        try {
+          const fileName = path.split(/[\\/]/).pop();
+          
+          const fileItem = document.createElement('div');
+          fileItem.className = 'file-item';
+          fileItem.innerHTML = `
+            <span class="file-name" title="${path}">${fileName}</span>
+            <span class="file-status pending">Pendente</span>
+          `;
+          
+          fileListElem.appendChild(fileItem);
+        } catch (error) {
+          console.error('Erro ao adicionar arquivo à interface:', error, path);
+        }
+      });
+      
+      updateConvertButton();
+    }
+    
+    function updateConvertButton() {
+      convertBtn.disabled = selectedFiles.length === 0 || !outputDir || converting;
+    }
+    
+    async function startConversion() {
+      if (selectedFiles.length === 0 || !outputDir || converting) return;
+      
+      converting = true;
+      currentFileIndex = 0;
+      successCount = 0;
+      errorCount = 0;
+      
+      // Atualizar interface
+      convertBtn.disabled = true;
+      progressContainer.style.display = 'block';
+      progressText.textContent = `0/${selectedFiles.length}`;
+      progressPercent.textContent = '0%';
+      progressFill.style.width = '0%';
+      
+      // Resetar status dos arquivos
+      const statusElements = document.querySelectorAll('.file-status');
+      statusElements.forEach(elem => {
+        elem.className = 'file-status pending';
+        elem.textContent = 'Pendente';
+      });
+      
+      // Iniciar conversão
+      processNextFile();
+    }
+    
+    async function processNextFile() {
+      if (currentFileIndex >= selectedFiles.length) {
+        converting = false;
+        updateConvertButton();
+        return;
+      }
+      
+      const inputPath = selectedFiles[currentFileIndex];
+      const format = formatSelect.value;
+      
+      console.log(`Processando arquivo ${currentFileIndex + 1}/${selectedFiles.length}: ${inputPath}`);
+      
+      // Atualizar status na interface
+      const fileItem = fileListElem.children[currentFileIndex];
+      const statusElem = fileItem.querySelector('.file-status');
+      statusElem.className = 'file-status converting';
+      statusElem.textContent = 'Convertendo...';
+      
+      try {
+        // Verificar se temos todos os dados necessários
+        if (!inputPath) {
+          throw { error: 'Caminho do arquivo de entrada inválido' };
+        }
+        
+        if (!outputDir) {
+          throw { error: 'Diretório de saída não selecionado' };
+        }
+        
+        // Registrar no log o que estamos tentando converter
+        console.log('Iniciando conversão com parâmetros:', {
+          inputPath,
+          outputPath: outputDir,
+          format
+        });
+        
+        // Tentar registrar log no processo principal também
+        try {
+          await window.electronAPI.log(`Convertendo: ${inputPath} para ${format}`);
+        } catch (e) {
+          console.warn('Não foi possível enviar log para o processo principal', e);
+        }
+        
+        // Iniciar conversão
+        const result = await window.electronAPI.convertAudio({
+          inputPath,
+          outputPath: outputDir,
+          format
+        });
+        
+        console.log('Resultado da conversão:', result);
+        
+        // Atualizar status de sucesso
+        statusElem.className = 'file-status success';
+        statusElem.textContent = 'Concluído';
+        successCount++;
+      } catch (error) {
+        console.error('Erro ao converter:', error);
+        // Atualizar status de erro
+        statusElem.className = 'file-status error';
+        
+        // Tentar obter a mensagem de erro mais apropriada
+        let errorMessage = 'Erro';
+        if (error && typeof error === 'object') {
+          errorMessage = error.error || error.message || 'Erro desconhecido';
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        }
+        
+        statusElem.textContent = errorMessage;
+        errorCount++;
+      }
+      
+      // Atualizar progresso
+      currentFileIndex++;
+      const progress = (currentFileIndex / selectedFiles.length) * 100;
+      progressText.textContent = `${currentFileIndex}/${selectedFiles.length}`;
+      progressPercent.textContent = `${Math.round(progress)}%`;
+      progressFill.style.width = `${progress}%`;
+      
+      // Processar próximo arquivo
+      processNextFile();
+    }
+  </script>
+</body>
+</html> 
