@@ -6,6 +6,9 @@ on:
     tags:
       - 'v*.*.*'
 
+permissions:
+  contents: write  # Needed for creating releases
+
 jobs:
   prepare-assets:
     runs-on: ubuntu-latest
@@ -29,10 +32,9 @@ jobs:
             echo "Downloading macOS icon..."
             curl -o src/assets/icons/icon.icns https://img.icons8.com/color/512/audio-wave.png
           fi
-          if [ ! -f src/assets/icons/icon.ico ]; then
-            echo "Downloading Windows icon..."
-            curl -o src/assets/icons/icon.ico https://img.icons8.com/color/256/audio-wave.png
-          fi
+          # For Windows, disable the icon since we don't have a proper ICO file
+          echo "Skipping Windows icon to avoid build errors"
+          echo "// Dummy file to prevent build errors" > src/assets/icons/icon.ico
       
       - name: Upload assets
         uses: actions/upload-artifact@v4
@@ -171,7 +173,4 @@ jobs:
             artifacts/linux-artifacts/*.AppImage
             artifacts/linux-artifacts/*.deb
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-permissions:
-  contents: write  # Needed for creating releases 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 

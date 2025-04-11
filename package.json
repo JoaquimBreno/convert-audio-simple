@@ -38,8 +38,7 @@
       "icon": "src/assets/icons/icon.icns"
     },
     "win": {
-      "target": ["nsis"],
-      "icon": "src/assets/icons/icon.ico"
+      "target": ["nsis"]
     },
     "linux": {
       "target": ["AppImage", "deb"],
